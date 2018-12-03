@@ -309,7 +309,7 @@ This variable is used to remind the optimizer to use the `Sort Merge Join` algor
 SELECT /*+ TIDB_INLJ(t1, t2) */ * from t1, t2 where t1.id = t2.id
 ```
 
-This variable is used to remind the optimizer to use the `Index Nested Loop Join` algorithm. In some scenarios, this algorithm runs faster and takes up fewer system resources, but may be slower and takes up more system resources in some other scenarios. You can try to use this algorithm in scenarios where the result-set is less than 10,000 rows after the outer table is filtered by the WHERE condition. The parameter in `TIDB_INLJ()` is the candidate table for the driving table (external table) when generating the query plan. That means, `TIDB_INLJ (t1)` will only consider using t1 as the driving table to create a query plan.
+This variable is used to remind the optimizer to use the `Index Nested Loop Join` algorithm. In some scenarios, this algorithm runs faster and takes up fewer system resources, but may be slower and takes up more system resources in some other scenarios. You can try to use this algorithm in scenarios where the result-set is less than 10,000 rows after the outer table is filtered by the WHERE condition. The parameter in `TIDB_INLJ()` is the candidate table for the inner table when you create the query plan. For example, `TIDB_INLJ (t1)` means that TiDB only considers using t1 as the inner table to create a query plan.
 
 ### TIDB_HJ(t1, t2)
 
@@ -344,3 +344,27 @@ Usage of statements:
 
 - `CREATE TABLE`: `CREATE TABLE t (c int) SHARD_ROW_ID_BITS = 4;`
 - `ALTER TABLE`: `ALTER TABLE t SHARD_ROW_ID_BITS = 4;`
+
+## tidb_slow_log_threshold
+
+- Scope: SESSION
+- Default value: 300ms
+- This variable is used to output the threshold value of the time consumed by the slow log. When the time consumed by a query is larger than this value, this query is considered as a slow log and its log is output to the slow query log.
+
+Usage example:
+
+```sql
+set tidb_slow_log_threshold = 200
+```
+
+## tidb_query_log_max_len
+
+- Scope: SESSION
+- Default value: 2048 (bytes)
+- The maximum length of the SQL statement output. When the output length of a statement is larger than the `tidb_query-log-max-len` value, the statement is truncated to output.
+
+Usage example:
+
+```sql
+set tidb_query_log_max_len = 20
+```
