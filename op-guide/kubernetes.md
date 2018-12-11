@@ -19,8 +19,8 @@ and automates tasks related to operating a TiDB cluster. It makes TiDB a truly c
   </label>
   <input id="tabAWS" type="radio" name="tabs" value="AWSContent">
   <label for="tabAWS">
-      <img src="http://videoadnews.com/wp-content/uploads/2017/11/aws.png" width="20"></img>
-      <span>AWS</span>
+      <span><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/2000px-Amazon_Web_Services_Logo.svg.png" width="20" top="63%"></img></span>
+      <span class="label__title">AWS</span>
   </label>
   <input id="tabLocal" type="radio" name="tabs" value="LocalContent">
   <label for="tabLocal">
