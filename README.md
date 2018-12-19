@@ -215,7 +215,7 @@ TiDB (The pronunciation is: /'taɪdiːbi:/ tai-D-B, etymology: titanium) is an o
 
 - __MySQL compatibility__
 
-    Use TiDB without changing a single line of MySQL application code in most cases and still benefit from the MySQL ecosystem.
+    Use TiDB without changing a single line of MySQL application code [in most cases](https://www.pingcap.com/docs/sql/mysql-compatibility/) and still benefit from the MySQL ecosystem.
 
 - __Distributed transactions__
 
