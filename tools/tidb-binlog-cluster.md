@@ -6,7 +6,7 @@ category: tools
 
 # TiDB-Binlog Cluster User Guide
 
-This document introduces the architecture and the deployment of TiDB-Binlog of the cluster version. If you want to use the local or Kafka version of TiDB-Binlog, see [the deployment document for TiDB-Binlog of the local version](../tools/tidb-binlog.md) and [the deployment document for TiDB-Binlog of the Kafka version](../tools/tidb-binlog-kafka.md).
+This document introduces the architecture and the deployment of TiDB-Binlog of the cluster version.
 
 TiDB-Binlog is an enterprise tool used to collect the binlog data of TiDB and provide real-time backup and synchronization.
 
@@ -57,7 +57,7 @@ The server hardware requirements for development, testing, and the production en
 * Drainer does not support the `rename` DDL operation on the table of `ignore schemas` (the schemas in the filter list).
 * If you want to start Drainer in the existing TiDB cluster, generally, you need to make a full backup of the cluster data, obtain `savepoint`, import the data to the target database, and then start Drainer to synchronize the incremental data from `savepoint`.
 * Drainer supports synchronizing binlogs to MySQL, TiDB, Kafka or the local files. If you need to synchronize binlogs to other destinations, you can set Drainer to synchronize the binlog to Kafka and read the data in Kafka for customization processing. See [Binlog Slave Client User Guide](../tools/binlog-slave-client.md).
-* If TiDB-Binlog is used for recovering the incremental data, you can set the downstream to `pb` to synchronize the binlog data to the local file and then use [Reparo](../tools/reparo.md) to recover the incremental data.
+* If TiDB-Binlog is used for recovering the incremental data, you can set the downstream to `pb` (local files in the proto buffer format). Drainer converts the binlog to data in the specified proto buffer format and writes the data to local files. In this way, you can use [Reparo](../tools/reparo.md) to recover the incremental data.
 * Pump/Drainer has two states: `paused` and `offline`. If you press Ctrl + C or kill the process, both Pump and Drainer become `paused`. The paused Pump do not need to send all the binlog data to Drainer. If you need to exit from Pump for a long period of time (or do not use Pump any more), use `binlogctl` to make Pump offline. The same goes for Drainer.
 * If the downstream is MySQL/TiDB, you can use [sync-diff-inspector](../tools/sync-diff-inspector.md) to verify the data after data synchronization.
 
@@ -76,29 +76,29 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
 1. Use the TiDB user account to log in to the central control machine and go to the `/home/tidb` directory. The information about the branch of TiDB-Ansible and the corresponding TiDB version is as follows. If you have questions regarding which version to use, email to [info@pingcap.com](mailto:info@pingcap.com) for more information or [file an issue](https://github.com/pingcap/tidb-ansible/issues/new).
 
-    | TiDB-Ansible Branch | TiDB Version | Note |
-    | ---------------- | --------- | --- |
-    | release-2.0-new-binlog | 2.0 version | the latest stable version; can be used in the production environment |
-    | release-2.1 | 2.1 version | the latest 2.1 RC version; it is not recommended to use this version in the production environment |
-    | master | master version | contains the latest features; updated daily |
+    | tidb-ansible branch | TiDB version | Note |
+    | ------------------- | ------------ | ---- |
+    | release-2.0 | 2.0 version | The latest 2.0 stable version. You can use it in the production environment. |
+    | release-2.1 | 2.1 version | The latest 2.1 stable version. You can use it in the production environment (recommended). |
+    | master | master version | This version includes the latest features with a daily update. |
 
 2. Use the following command to download the corresponding branch of TiDB-Ansible from the [TiDB-Ansible project](https://github.com/pingcap/tidb-ansible) on GitHub. The default folder name is `tidb-ansible`.
 
     - Download the 2.0 version:
         
-        ```
+        ```bash
         $ git clone -b release-2.0-new-binlog https://github.com/pingcap/tidb-ansible.git
         ```
 
     - Download the 2.1 version:
 
-        ```
+        ```bash
         $ git clone -b release-2.1 https://github.com/pingcap/tidb-ansible.git
         ```
 
     - Download the master version:
 
-        ```
+        ```bash
         $ git clone https://github.com/pingcap/tidb-ansible.git
         ```
 
@@ -150,7 +150,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
     Use `binlogctl` to check the Pump status. Change the `pd-urls` parameter to the PD address of the cluster. If `State` is `online`, Pump is started successfully.
 
-    ```
+    ```bash
     $ cd /home/tidb/tidb-ansible
     $ resources/bin/binlogctl -pd-urls=http://172.16.10.72:2379 -cmd pumps
     2018/09/21 16:45:54 nodes.go:46: [info] pump: &{NodeID:ip-172-16-10-72:8250 Addr:172.16.10.72:8250 State:online IsAlive:false Score:0 Label:<nil> MaxCommitTS:0 UpdateTS:403051525690884099}
@@ -164,7 +164,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
     Run the following command to use `binlogctl` to generate the `tso` information which is needed for the initial start of Drainer:
 
-    ```
+    ```bash
     $ cd /home/tidb/tidb-ansible
     $ resources/bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd generate_meta
     INFO[0000] [pd] create pd client with endpoints [http://192.168.199.118:32379]
@@ -203,7 +203,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
     - Assume that the downstream is MySQL:
 
-        ```
+        ```bash
         $ cd /home/tidb/tidb-ansible/conf
         $ cp drainer.toml drainer_mysql_drainer.toml
         $ vi drainer_mysql_drainer.toml
@@ -215,7 +215,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
         ```toml
         # downstream storage, equal to --dest-db-type
-        # Valid values are "mysql", "pb", "kafka", "flash", and "tidb".
+        # Valid values are "mysql", "pb", "kafka", and "flash".
         db-type = "mysql"
 
         # the downstream MySQL protocol database
@@ -231,7 +231,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
     - Assume that the downstream is `pb`:
 
-        ```
+        ```bash
         $ cd /home/tidb/tidb-ansible/conf
         $ cp drainer.toml drainer_pb_drainer.toml
         $ vi drainer_pb_drainer.toml
@@ -241,7 +241,7 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
         ```toml
         # downstream storage, equal to --dest-db-type
-        # Valid values are "mysql", "pb", "kafka", "flash", and "tidb".
+        # Valid values are "mysql", "pb", "kafka", and "flash".
         db-type = "pb"
 
         # Uncomment this if you want to use `pb` or `sql` as `db-type`.
@@ -255,13 +255,13 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 
 5. Deploy Drainer.
 
-    ```
+    ```bash
     $ ansible-playbook deploy_drainer.yml
     ```
 
 6. Start Drainer.
 
-    ```
+    ```bash
     $ ansible-playbook start_drainer.yml
     ```
 
@@ -270,19 +270,19 @@ It is recommended to deploy TiDB-Binlog using TiDB-Ansible. If you just want to 
 #### Download the official Binary
 
 ```bash
-TiDB（v2.0.8-binlog, v2.1.0-rc.5 or the later version）
+# TiDB（v2.0.8-binlog, v2.1.0-rc.5 or the later version）
 wget https://download.pingcap.org/tidb-{version}-linux-amd64.tar.gz
 wget https://download.pingcap.org/tidb-{version}-linux-amd64.sha256
 
-# Check the file integrity. It should return OK.
-sha256sum -c tidb-v2.0.8-binlog-linux-amd64.sha256
+# Check the file integrity. If the result is OK, the file is correct.
+sha256sum -c tidb-{version}-binlog-linux-amd64.sha256
 
-Pump && Drainer
-wget https://download.pingcap.org/tidb-binlog-cluster-latest-linux-amd64.tar.gz
-wget https://download.pingcap.org/tidb-binlog-cluster-latest-linux-amd64.sha256
+# Pump && Drainer (cluster-latest, v2.1.0-rc.5 or the later version)
+wget https://download.pingcap.org/tidb-binlog-{version}-linux-amd64.tar.gz
+wget https://download.pingcap.org/tidb-binlog-{version}-linux-amd64.sha256
 
-# Check the file integrity. It should return OK.
-sha256sum -c tidb-binlog-cluster-latest-linux-amd64.sha256
+# Check the file integrity. If the result is OK, the file is correct.
+sha256sum -c tidb-binlog-{version}-linux-amd64.sha256
 ```
 
 #### The usage example
@@ -390,7 +390,7 @@ The following part shows how to use Pump and Drainer based on the nodes above.
             the directory where the Drainer data is stored ("data.drainer" by default)
         -dest-db-type string
             the downstream service type of Drainer
-            The value can be "mysql", "kafka", "pb", "flash", and "tidb". ("mysql" by default)
+            The value can be "mysql", "kafka", "pb", and "flash". ("mysql" by default)
         -detect-interval int
             the interval of checking the online Pump in PD (10 by default, in seconds)
         -disable-detect
@@ -425,70 +425,70 @@ The following part shows how to use Pump and Drainer based on the nodes above.
 
         ```toml
         # Drainer Configuration.
- 
+
         # the address through which Drainer provides the service ("192.168.0.13:8249")
         addr = "192.168.0.13:8249"
- 
+
         # the interval of checking the online Pump in PD (10 by default, in seconds)
         detect-interval = 10
- 
+
         # the directory where the Drainer data is stored "data.drainer" by default)
         data-dir = "data.drainer"
- 
+
         # the address of the PD cluster nodes
         pd-urls = "http://192.168.0.16:2379,http://192.168.0.15:2379,http://192.168.0.14:2379"
- 
+
         # the directory of the log file
         log-file = "drainer.log"
- 
+
         # Syncer Configuration
         [syncer]
- 
+
         # the db filter list ("INFORMATION_SCHEMA,PERFORMANCE_SCHEMA,mysql,test" by default)
         # Does not support the Rename DDL operation on tables of `ignore schemas`.
         ignore-schemas = "INFORMATION_SCHEMA,PERFORMANCE_SCHEMA,mysql"
- 
+
         # the number of SQL statements of a transaction which are output to the downstream database (1 by default)
         txn-batch = 1
 
-        # the number of the concurrency of the downstream for synchronization. The bigger the value, 
+        # the number of the concurrency of the downstream for synchronization. The bigger the value,
         # the better throughput performance of the concurrency (1 by default)
         worker-count = 1
- 
-        # whether to disable the SQL feature of splitting a single binlog file. If it is set to "true", 
+
+        # whether to disable the SQL feature of splitting a single binlog file. If it is set to "true",
         # each binlog file is restored to a single transaction for synchronization based on the order of binlogs.
         # If the downstream service is MySQL, set it to "False".
         disable-dispatch = false
- 
+
         # the downstream service type of Drainer ("mysql" by default)
-        # Valid value: "mysql", "kafka", "pb", "flash", "tidb"
+        # Valid value: "mysql", "kafka", "pb", "flash"
         db-type = "mysql"
- 
+
         # `replicate-do-db` has priority over `replicate-do-table`. When they have the same `db` name,
         # regular expressions are supported for configuration.
         # The regular expression should start with "~".
- 
+
         # replicate-do-db = ["~^b.*","s1"]
- 
+
         # [[syncer.replicate-do-table]]
         # db-name ="test"
         # tbl-name = "log"
- 
+
         # [[syncer.replicate-do-table]]
         # db-name ="test"
         # tbl-name = "~^a.*"
- 
+
         # the server parameters of the downstream database when `db-type` is set to "mysql"
         [syncer.to]
         host = "192.168.0.13"
         user = "root"
         password = ""
         port = 3306
- 
+
         # the directory where the binlog file is stored when `db-type` is set to `pb`
         # [syncer.to]
         # dir = "data.drainer"
- 
+
         # the Kafka configuration when `db-type` is set to "kafka"
         # [syncer.to]
         # zookeeper-addrs = "127.0.0.1:2181"
@@ -497,9 +497,9 @@ The following part shows how to use Pump and Drainer based on the nodes above.
         ```
 
     - The example of starting Pump:  
-        
+
         > **Note:** If the downstream is MySQL/TiDB, to guarantee the data integrity, you need to obtain the `initial-commit-ts` value and make a full backup of the data and restore the data before the initial start of Drainer. For details, see [Deploy Drainer](#step-3-deploy-drainer).
-    
+
         When Pump is started for the first time, use the `initial-commit-ts` parameter.
 
         ```bash
@@ -531,7 +531,7 @@ For how to pause, close, check, and modify the state of Drainer, see the [binlog
 
 ### `binlogctl` guide
 
-[`binlogctl`](https://github.com/pingcap/tidb-tools/tree/develop/tidb-binlog/binlogctl) is an operations tool for TiDB-Binlog with the following features:
+[`binlogctl`](https://github.com/pingcap/tidb-tools/tree/master/tidb-binlog/binlogctl) is an operations tool for TiDB-Binlog with the following features:
 
 * Obtaining the current `ts`
 * Checking the Pump/Drainer state
@@ -587,25 +587,27 @@ Command example:
 
 - Check the state of all the Pumps or Drainers:
 
-    ```
+    ```bash
     bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd pumps/drainers
 
-    2018/06/21 11:24:10 nodes.go:53: [info] pump: &{NodeID:ip-192-168-199-118:8250 Host:127.0.0.1:8250 IsAlive:true IsOffline:false LatestFilePos:{Suffix:0 Offset:15320} LatestKafkaPos:{Suffix:0 Offset:382} OfflineTS:0}
+    2018/12/18 03:17:09 nodes.go:46: [info] pump: &{NodeID:1.1.1.1:8250 Addr:pump:8250 State:online IsAlive:false Score:0 Label:<nil> MaxCommitTS:405039487358599169 UpdateTS:405027205608112129}
     ```
- 
+
+    > **Note:** Currently, the `IsAlive`, `Score` and `Label` fields are not used, so you do not need to pay attention to them.
+
 - Modify the Pump/Drainer state:
 
-    ```
+    ```bash
     The Pump/Drainer states include `online`, `pausing`, `paused`, `closing` and `offline`. 
 
     bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd update-pump/update-drainer -node-id ip-127-0-0-1:8250/{nodeID} -state {state}
     ```
 
     This command modifies the Pump/Drainer state saved in PD.
- 
+
 - Pause or close Pump/Drainer:
 
-    ```
+    ```bash
     bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd pause-pump/pause-drainer/offline-pump/offline-drainer -node-id ip-127-0-0-1:8250/{nodeID}
     ```
 
@@ -613,7 +615,7 @@ Command example:
 
 - Generate the meta file that Drainer needs to start:
 
-    ```
+    ```bash
     bin/binlogctl -pd-urls=http://127.0.0.1:2379 -cmd generate_meta
 
     INFO[0000] [pd] create pd client with endpoints [http://192.168.199.118:32379]
@@ -632,7 +634,15 @@ For TiDB-Binlog monitoring metrics, see [TiDB-Binlog Monitoring Metrics](../tool
 
 ## TiDB-Binlog upgrade
 
-The cluster version of TiDB-Binlog is not compatible with the Kafka or local version of TiDB-Binlog. If TiDB is upgraded to a new version (v2.0.8-binlog, v2.1.0-rc.5 or later), only the cluster version of TiDB-Binlog can be used; if the Kafka or local version of TiDB-Binlog is used before upgrading, you need to upgrade TiDB-Binlog to the cluster version.
+The new TiDB versions (v2.0.8-binlog, v2.1.0-rc.5 or later) are not compatible with the [Kafka version](../tools/tidb-binlog-kafka.md) or [local version](../tools/tidb-binlog.md) of TiDB-Binlog. If TiDB is upgraded to one of the new versions, it is required to use the cluster version of TiDB-Binlog. If the Kafka or local version of TiDB-Binlog is used before upgrading, you need to upgrade your TiDB-Binlog to the cluster version.
+
+The corresponding relationship between TiDB-Binlog versions and TiDB versions is shown in the following table:
+
+| TiDB-Binlog version | TiDB version | Note |
+|:---|:---|:---|
+| Local | TiDB 1.0 or earlier ||
+| Kafka | TiDB 1.0 ~ TiDB 2.1 RC5 | TiDB 1.0 supports both the local and Kafka versions of TiDB-Binlog. |
+| Cluster | TiDB v2.0.8-binlog, TiDB 2.1 RC5 or later | TiDB v2.0.8-binlog is a special 2.0 version supporting the cluster version of TiDB-Binlog. |
 
 ### Upgrade process
 

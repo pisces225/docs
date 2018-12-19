@@ -85,7 +85,7 @@
     - [Offline Deployment Using Ansible](op-guide/offline-ansible-deployment.md)
     - [Docker Deployment](op-guide/docker-deployment.md)
     - [Docker Compose Deployment](op-guide/docker-compose.md)
-    - [Cross-Region Deployment](op-guide/location-awareness.md)
+    - [Cross-DC Deployment Solutions](op-guide/cross-dc-deployment.md)
     - [Kubernetes Deployment](op-guide/kubernetes.md)
   + Configure
     - [Configuration Flags](op-guide/configuration.md)
@@ -93,6 +93,7 @@
     - [Modify Component Configuration Using Ansible](op-guide/ansible-deployment-rolling-update.md#modify-component-configuration)
     - [Enable TLS Authentication](op-guide/security.md)
     - [Generate Self-signed Certificates](op-guide/generate-self-signed-certificates.md)
+    - [Cluster Topology Configuration](op-guide/location-awareness.md)
   + Monitor
     - [Monitoring Framework Overview](op-guide/monitor-overview.md)
     + Key Monitoring Metrics
@@ -106,7 +107,8 @@
     - [Scale Using Ansible](op-guide/ansible-deployment-scale.md)
   + Upgrade
     - [Upgrade the Component Version](op-guide/ansible-deployment-rolling-update.md#upgrade-the-component-version)
-    - [TiDB 2.0 Upgrade Guide](op-guide/tidb-v2-upgrade-guide.md)
+    - [TiDB 2.0 Upgrade Guide](op-guide/tidb-v2.0-upgrade-guide.md)
+    - [TiDB 2.1 Upgrade Guide](op-guide/tidb-v2.1-upgrade-guide.md)
   - [Tune Performance](op-guide/tune-tikv.md)
   + Backup and Migrate
     - [Backup and Restore](op-guide/backup-restore.md)
@@ -133,6 +135,9 @@
       - [Sharding DDL Usage Restrictions](tools/dm-sharding-solution.md#sharding-ddl-usage-restrictions)
       - [Troubleshoot Sharding DDL Locks](tools/troubleshooting-sharding-ddl-locks.md)
     - [Monitor](tools/dm-monitor.md)
+    - [Manage the Task](tools/data-migration-manage-task.md)
+    - [Cluster Operations](tools/data-migration-cluster-operations.md)
+    - [Upgrade Loader or Syncer to DM](tools/upgrade-loader-or-syncer-to-dm.md)
     - [Troubleshoot](tools/data-migration-troubleshooting.md)
   + TiDB-Lightning
     - [Overview](tools/lightning/overview-architecture.md)
@@ -153,6 +158,8 @@
 - [Frequently Asked Questions (FAQ)](FAQ.md)
 - [TiDB Best Practices](https://pingcap.com/blog/2017-07-24-tidbbestpractice/)
 + [Releases](releases/rn.md)
+  - [2.0.10](releases/2.0.10.md)
+  - [2.1.1](releases/2.1.1.md)
   - [2.1 GA](releases/2.1ga.md)
   - [2.0.9](releases/209.md)
   - [2.1 RC5](releases/21rc5.md)
