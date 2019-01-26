@@ -173,7 +173,7 @@ Assuming that you want to add a DM-worker instance on the `172.16.10.74` machine
 
 1. Configure the SSH mutual trust and sudo rules on the Control Machine.
 
-    1. Refer to [Configure the SSH mutual trust and sudo rules on the Control Machine](/tools/dm/deployment.md#step-5-configure-the-ssh-mutual-trust-and-sudo-rules-on-the-control-machine), log in to the Control Machine using the `tidb` user account and add `172.16.10.74` to the `[servers]` section of the `hosts.ini` file.
+    1. Refer to [Configure the SSH mutual trust and sudo rules on the Control Machine](/tools/dm/deploy-using-ansible.md#step-5-configure-the-ssh-mutual-trust-and-sudo-rules-on-the-control-machine), log in to the Control Machine using the `tidb` user account and add `172.16.10.74` to the `[servers]` section of the `hosts.ini` file.
 
         ```
         $ cd /home/tidb/dm-ansible
@@ -267,7 +267,7 @@ Assuming that the `172.16.10.71` machine needs to be maintained or this machine 
 
 1. Configure the SSH mutual trust and sudo rules on the Control machine.
 
-    1. Refer to [Configure the SSH mutual trust and sudo rules on the Control Machine](/tools/dm/deployment.md#step-5-configure-the-ssh-mutual-trust-and-sudo-rules-on-the-control-machine), log in to the Control Machine using the `tidb` user account, and add `172.16.10.80` to the `[servers]` section of the `hosts.ini` file.
+    1. Refer to [Configure the SSH mutual trust and sudo rules on the Control Machine](/tools/dm/deploy-using-ansible.md#step-5-configure-the-ssh-mutual-trust-and-sudo-rules-on-the-control-machine), log in to the Control Machine using the `tidb` user account, and add `172.16.10.80` to the `[servers]` section of the `hosts.ini` file.
 
         ```
         $ cd /home/tidb/dm-ansible
@@ -327,7 +327,7 @@ Assuming that the `172.16.10.72` machine needs to be maintained or this machine 
 
 1. Configure the SSH mutual trust and sudo rules on the Control Machine. 
 
-    1. Refer to [Configure the SSH mutual trust and sudo rules on the Control Machine](/tools/dm/deployment.md#step-5-configure-the-ssh-mutual-trust-and-sudo-rules-on-the-control-machine), log in to the Control Machine using the `tidb` user account, and add `172.16.10.75` to the `[servers]` section of the `hosts.ini` file.
+    1. Refer to [Configure the SSH mutual trust and sudo rules on the Control Machine](/tools/dm/deploy-using-ansible.md#step-5-configure-the-ssh-mutual-trust-and-sudo-rules-on-the-control-machine), log in to the Control Machine using the `tidb` user account, and add `172.16.10.75` to the `[servers]` section of the `hosts.ini` file.
 
         ```
         $ cd /home/tidb/dm-ansible
