@@ -8,16 +8,17 @@ category: tools
 
 ## Download binary
 
+```shell
+# Download the DM package.
+wget http://download.pingcap.org/dm-latest-linux-amd64.tar.gz
+wget http://download.pingcap.org/dm-latest-linux-amd64.sha256
+
+# Check the file integrity. If the result is OK, the file is correct.
+sha256sum -c dm-latest-linux-amd64.sha256
+# Extract the package.
+tar -xzf dm-latest-linux-amd64.tar.gz
+cd dm-latest-linux-amd64
 ```
-  # Download the DM package.
-  wget http://download.pingcap.org/dm-latest-linux-amd64.tar.gz
-  wget http://download.pingcap.org/dm-latest-linux-amd64.sha256
-   # Check the file integrity. If the result is OK, the file is correct.
-  sha256sum -c dm-latest-linux-amd64.sha256
-   # Extract the package.
-  tar -xzf dm-latest-linux-amd64.tar.gz
-  cd dm-latest-linux-amd64
-  ```
 
 ## Config File
 
@@ -52,11 +53,11 @@ config file of DM-master
 ```toml
 # Master Configuration.
 
-// log configuration
+# log configuration
 #log-level = "info"
 #log-file = "dm-master.log"
 
-// dm-master listen address
+# dm-master listen address
 #master-addr = "172.16.10.71:8261"
 
 # replication group <-> dm-Worker deployment, we'll refine it when new deployment function is available
@@ -95,30 +96,30 @@ config file of `DM-worker1-1`
 ```toml
 # Worker Configuration.
 
-// log configuration
+# log configuration
 #log-level = "info"
 #log-file = "dm-worker.log"
 
-// dm-worker listen address
+# dm-worker listen address
 #worker-addr = ":8262"
 
-// server id of slave for binlog replication
-// each instance (master and slave) in replication group should have different server id
+# server id of slave for binlog replication
+# each instance (master and slave) in replication group should have different server id
 server-id = 101
 
-// represents a MySQL/MariaDB instance or a replication group
+# represents a MySQL/MariaDB instance or a replication group
 source-id = "mysql-replica-11"
 
-// flavor: mysql/mariadb
+# flavor: mysql/mariadb
 flavor = "mysql"
 
-// directory that used to store relay log
+# directory that used to store relay log
 #relay-dir = "./relay_log"
 
-//  enable gtid in relay log unit
+#  enable gtid in relay log unit
 enable-gtid = false
 
-// charset of DSN of source mysql/mariadb instance
+# charset of DSN of source mysql/mariadb instance
 # charset= ""
 
 [from]
@@ -127,7 +128,7 @@ user = "root"
 password = ""
 port = 3306
 
-// relay log purge strategy
+# relay log purge strategy
 #[purge]
 #interval = 3600
 #expires = 24
