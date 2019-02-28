@@ -257,6 +257,8 @@ You can use Docker Compose to build a TiDB cluster locally, including the cluste
 
 2. If a slow query occurs, you can locate the `tidb-server` instance where the slow query is and the slow query time point using Grafana and find the SQL statement information recorded in the log on the corresponding node.
 
+3. In addition to the log, you can also view the slow query using the `admin show slow` command. For details, see [`admin show slow` command](sql/slow-query.md#admin-show-slow-command).
+
 #### How to add the `label` configuration if `label` of TiKV was not configured when I deployed the TiDB cluster for the first time?
 
 The configuration of TiDB `label` is related to the cluster deployment architecture. It is important and is the basis for PD to execute global management and scheduling. If you did not configure `label` when deploying the cluster previously, you should adjust the deployment structure by manually adding the `location-labels` information using the PD management tool `pd-ctl`, for example, `config set location-labels "zone, rack, host"` (you should configure it based on the practical `label` level name).
@@ -708,7 +710,7 @@ See [Loader Instructions](tools/loader.md).
  
 #### How to migrate an application running on MySQL to TiDB?
 
-Because TiDB supports most MySQL syntax, generally you can migrate your applications to TiDB without changing a single line of code in most cases. You can use [checker](https://github.com/pingcap/tidb-tools/tree/master/checker) to check whether the Schema in MySQL is compatible with TiDB.
+Because TiDB supports most MySQL syntax, generally you can migrate your applications to TiDB without changing a single line of code in most cases.
 
 #### If I accidentally import the MySQL user table into TiDB, or forget the password and cannot log in, how to deal with it?
 
@@ -749,6 +751,10 @@ CREATE TABLE if not exists mysql.user (
 INSERT INTO mysql.user VALUES ("%", "root", "", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y");
 ```
 
+#### Can TiDB provide services while Loader is running?
+ 
+ TiDB can provide services while Loader is running because Loader inserts the data logically. But do not perform the related DDL operations.
+
 #### How to export the data in TiDB?
 
 Currently, TiDB does not support `select into outfile`. You can use the following methods to export the data in TiDB:
@@ -787,6 +793,10 @@ Two solutions:
     ```
 
 - You can also increase the limited number of statements in a single TiDB transaction, but this will consume more memory.
+
+#### Does TiDB have a function like the Flashback Query in Oracle? Does it support DDL?
+
+ Yes, it does. And it supports DDL as well. For details, see [how TiDB reads data from history versions](op-guide/history-read.md).
 
 ### Migrate the data online
 
@@ -828,6 +838,11 @@ Two solutions:
 
 - Put the `syncer.meta` file in a relatively secure disk. For example, use disks with RAID 1.
 - Restore the location information of history synchronization according to the monitoring data that Syncer reports to Prometheus regularly. But the location information might be inaccurate due to the delay when a large amount of data is synchronized.
+
+##### If the downstream TiDB data is not consistent with the MySQL data during the synchronization process of Syncer, will DML operations cause exits?
+
+- If the data exists in the upstream MySQL but does not exist in the downstream TiDB, when the upstream MySQL performs the `UPDATE` or `DELETE` operation on this row of data, Syncer will not report an error and the synchronization process will not exit, and this row of data does not exist in the downstream.
+- If a conflict exists in the primary key indexes or the unique indexes in the downstream, preforming the `UPDATE` operation will cause an exit and performing the `INSERT` operation will not cause an exit.
 
 ### Migrate the traffic
 
@@ -913,9 +928,20 @@ Recommendations:
 3. Test the `count` in the case of large amount of data.
 4. Optimize the TiKV configuration. See [Performance Tuning for TiKV](op-guide/tune-tikv.md).
 
-#### How to view the progress of adding an index?
+#### How to view the progress of the current DDL job?
 
-Use `admin show ddl` to view the current job of adding an index.
+You can use `admin show ddl` to view the progress of the current DDL job. The operation is as follows:
+
+```sql
+tidb> admin show ddl\G;
+*************************** 1. row ***************************
+  SCHEMA_VER: 140
+       OWNER: 1a1c4174-0fcd-4ba0-add9-12d08c4077dc
+RUNNING_JOBS: ID:121, Type:add index, State:running, SchemaState:write reorganization, SchemaID:1, TableID:118, RowCount:77312, ArgLen:0, start time: 2018-12-05 16:26:10.652 +0800 CST, Err:<nil>, ErrCount:0, SnapshotVersion:404749908941733890
+     SELF_ID: 1a1c4174-0fcd-4ba0-add9-12d08c4077dc
+```
+
+From the above results, you can get that the `add index` operation is being processed currently. You can also get from the `RowCount` field of the `RUNNING_JOBS` column that now the `add index` operation has added 77312 rows of indexes.
 
 #### How to view the DDL job?
 
@@ -975,9 +1001,13 @@ See [Key Metrics](op-guide/dashboard-overview-info.md).
 
 The monitoring system of TiDB consists of Prometheus and Grafana. From the dashboard in Grafana, you can monitor various running metrics of TiDB which include the monitoring metrics of system resources, of client connection and SQL operation, of internal communication and Region scheduling. With these metrics, the database administrator can better understand the system running status, running bottlenecks and so on. In the practice of monitoring these metrics, we list the key metrics of each TiDB component. Generally you only need to pay attention to these common metrics. For details, see [Key Metrics](op-guide/dashboard-overview-info.md).
 
-#### The Prometheus monitoring data is deleted each month by default. Could I set it to two months or delete the monitoring data manually?
+#### The Prometheus monitoring data is deleted every 15 days by default. Could I set it to two months or delete the monitoring data manually?
 
 Yes. Find the startup script on the machine where Prometheus is started, edit the startup parameter and restart Prometheus.
+
+```
+--storage.tsdb.retention="60d"
+```
 
 #### Region Health monitor
 
