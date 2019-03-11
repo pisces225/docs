@@ -61,7 +61,7 @@ Try the latest version! Maybe there is new speed improvement.
 
     Max Memory Usage ≈ `max-open-engine` × `write-buffer-size` × `max-write-buffer-number`
 
-2. Decrease the value of `table-concurrency` so it is less than `max-open-engine`.
+2. Decrease the value of `table-concurrency` + `index-concurrency` so it is less than `max-open-engine`.
 
 3. Restart `tikv-importer` to forcefully remove all engine files. This also removes all partially imported tables, thus it is required to run `tidb-lightning-ctl --error-checkpoint-destroy=all`.
 
